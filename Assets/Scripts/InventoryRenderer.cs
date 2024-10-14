@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,7 +10,9 @@ public class InventoryRenderer : MonoBehaviour
     public RectTransform RectTransform;
     public int YCells;
     public int XCells;
-    private Image[] _images;
+
+    // Liste de listes pour stocker les cellules
+    private List<List<Cell>> cells;
 
     public void RenderGrid()
     {
@@ -20,26 +23,29 @@ public class InventoryRenderer : MonoBehaviour
             Destroy(child.gameObject);
         }
 
+        // Initialiser la liste de listes des cellules
+        cells = new List<List<Cell>>();
+
         // Render empty cells grid
         for (int i = 0; i < YCells; i++)
         {
+            cells.Add(new List<Cell>());
             for (int j = 0; j < XCells; j++)
             {
-                var go = new GameObject();
-                var rectTransform = go.AddComponent<RectTransform>();
-                go.AddComponent<Image>();
-                rectTransform.sizeDelta = cellSize;
-                go.GetComponent<Image>().sprite = CellSpriteEmpty;
-                rectTransform.SetParent(RectTransform, false);
+                var cell = new Cell(cellSize, CellSpriteEmpty);
+                cell.RectTransform.SetParent(RectTransform, false);
 
                 // Position the cell within the grid
-                rectTransform.anchoredPosition = new Vector2(j * cellSize.x, -i * cellSize.y);
+                cell.RectTransform.anchoredPosition = new Vector2(j * cellSize.x, -i * cellSize.y);
+
+                // Store the cell in the list
+                cells[i].Add(cell);
 
                 Debug.Log($"Created empty cell at ({i}, {j})");
             }
         }
 
-// Render items on top of the empty cells
+        // Render items on top of the empty cells
         for (int i = 0; i < YCells; i++)
         {
             for (int j = 0; j < XCells; j++)
@@ -48,19 +54,59 @@ public class InventoryRenderer : MonoBehaviour
                 if (index < Inventory.items.Count)
                 {
                     var item = Inventory.items[index];
-                    var go = new GameObject();
-                    var rectTransform = go.AddComponent<RectTransform>();
-                    go.AddComponent<Image>();
-                    rectTransform.sizeDelta = cellSize;
-                    go.GetComponent<Image>().sprite = item.ItemSprite;
-                    rectTransform.SetParent(RectTransform, false);
-
-                    // Position the item within the grid
-                    rectTransform.anchoredPosition = new Vector2(j * cellSize.x, -i * cellSize.y);
+                    cells[i][j].AddItem(item);
 
                     Debug.Log($"Created item cell at ({i}, {j}) with item {item.ItemName}");
                 }
             }
         }
+    }
+
+    // Méthode pour obtenir la cellule à une position donnée
+    public Cell GetCell(int row, int col)
+    {
+        if (row >= 0 && row < YCells && col >= 0 && col < XCells)
+        {
+            return cells[row][col];
+        }
+        return null;
+    }
+
+    // Méthode pour obtenir la position d'une cellule
+    public Vector2 GetCellPosition(int row, int col)
+    {
+        return new Vector2(col * cellSize.x, -row * cellSize.y);
+    }
+}
+
+public class Cell
+{
+    public RectTransform RectTransform { get; private set; }
+    public Item Item { get; private set; }
+
+    public Cell(Vector2 size, Sprite emptySprite)
+    {
+        var go = new GameObject();
+        RectTransform = go.AddComponent<RectTransform>();
+        var image = go.AddComponent<Image>();
+        go.AddComponent<DropHandler>();
+        RectTransform.sizeDelta = size;
+        image.sprite = emptySprite;
+    }
+
+    public void AddItem(Item item)
+    {
+        Item = item;
+        var go = new GameObject();
+        var rectTransform = go.AddComponent<RectTransform>();
+        go.AddComponent<CanvasGroup>();
+        go.AddComponent<DragNDrop>();
+        go.AddComponent<Image>();
+        rectTransform.sizeDelta = RectTransform.sizeDelta;
+        go.GetComponent<Image>().sprite = item.ItemSprite;
+        rectTransform.SetParent(RectTransform, false);
+
+        // Position the item within the grid
+        rectTransform.anchoredPosition = Vector2.zero;
     }
 }

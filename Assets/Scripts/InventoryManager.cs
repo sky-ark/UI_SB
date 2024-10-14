@@ -1,17 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
 
 
 public class InventoryManager : MonoBehaviour
 {
     public Inventory inventory;
     public InventoryRenderer inventoryRenderer;
-    public  GameObject inventoryPanel;  
-    
+    public GameObject inventoryPanel;
+
     public bool InventoryOpen { get; private set; }
-    
+
     public bool OpenInventory()
     {
         inventoryPanel.SetActive(true);
