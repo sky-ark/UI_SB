@@ -8,6 +8,8 @@ public class CharacterController : MonoBehaviour
     public float speed = 10f;
 
     public Animation swordAnimation;
+    
+    public InventoryManager inventoryManager;
 
     private void Update()
     {
@@ -18,8 +20,21 @@ public class CharacterController : MonoBehaviour
         {
             Attack();
         }
+
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            CallInventory();
+        }
     }
-    
+
+    private void CallInventory()
+    {
+        if(inventoryManager.InventoryOpen)
+            inventoryManager.CloseInventory();
+        else
+            inventoryManager.OpenInventory();
+    }
+
     private void Attack()
     {
         Debug.Log("Attack");
