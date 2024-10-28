@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using UnityEngine;
 
+[System.Serializable]
 
 [CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item")]
 public class Item : ScriptableObject
@@ -9,6 +10,7 @@ public class Item : ScriptableObject
     public Sprite ItemSprite;
     public ItemType Type;
     public bool CanDrop;
+    public float ItemPrice = 10;
 
     public enum ItemType
     {
